@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentario Aleatorio de YouTube sobre Guatemala</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #comment-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            text-align: center;
+        }
+        #channel-name {
+            font-weight: bold;
+            color: #c00;
+            margin-bottom: 10px;
+        }
+        #comment {
+            font-style: italic;
+            margin-top: 20px;
+        }
+        #commenter-name {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="comment-container">
+        <h1>Comentario Aleatorio de YouTube sobre Guatemala</h1>
+        <div id="channel-name">Cargando canal...</div>
+        <p id="comment">Cargando comentario...</p>
+        <div id="commenter-name"></div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyCH-r3o_L9-FxoVO2ha0siOCnanTL1bCi4'; // Reemplaza esto con tu API key real
+
+        async function fetchRandomComment() {
+            try {
+                // Buscar canales relacionados con Guatemala
+                const channelSearchResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=Guatemala&key=${API_KEY}&maxResults=50`);
+                const channelSearchData = await channelSearchResponse.json();
+                
+                // Seleccionar un canal aleatoriamente
+                const randomChannel = channelSearchData.items[Math.floor(Math.random() * channelSearchData.items.length)];
+                const channelId = randomChannel.id.channelId;
+                const channelName = randomChannel.snippet.title;
+                
+                document.getElementById('channel-name').textContent = channelName;
+
+                // Obtener videos del canal seleccionado
+                const videosResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${channelId}&part=id&order=date&maxResults=50&type=video`);
+                const videosData = await videosResponse.json();
+                
+                // Seleccionar un video aleatoriamente
+                const randomVideo = videosData.items[Math.floor(Math.random() * videosData.items.length)];
+                const videoId = randomVideo.id.videoId;
+
+                // Obtener comentarios del video seleccionado
+                const commentsResponse = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?key=${API_KEY}&videoId=${videoId}&part=snippet&maxResults=100`);
+                const commentsData = await commentsResponse.json();
+
+                // Seleccionar un comentario aleatoriamente
+                const randomComment = commentsData.items[Math.floor(Math.random() * commentsData.items.length)];
+                const commentText = randomComment.snippet.topLevelComment.snippet.textDisplay;
+                const commenterName = randomComment.snippet.topLevelComment.snippet.authorDisplayName;
+
+                // Mostrar el comentario y el nombre del comentarista
+                document.getElementById('comment').innerHTML = commentText;
+                document.getElementById('commenter-name').textContent = `- ${commenterName}`;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('channel-name').textContent = 'Error al cargar el canal';
+                document.getElementById('comment').textContent = 'No se pudo cargar el comentario. Por favor, intenta más tarde.';
+                document.getElementById('commenter-name').textContent = '';
+            }
+        }
+
+        // Obtener un comentario aleatorio cuando se carga la página
+        fetchRandomComment();
+    </script>
+</body>
+</html>
